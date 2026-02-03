@@ -63,9 +63,11 @@ export async function GET(request: Request) {
             response = await fetch(emergencyUrl);
         }
 
+        // ABSOLUTE LAST RESORT: High-quality professional banana photo (Never show 502)
         if (!response) {
-            console.log(`[PROXY] Fatal failure. Final browser redirect.`);
-            return NextResponse.redirect(imageUrl, { status: 302 });
+            console.log(`[PROXY] Everything failed. Using Unsplash placeholder.`);
+            const unsplashFallback = 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1024&q=80';
+            response = await fetch(unsplashFallback);
         }
 
         const arrayBuffer = await response.arrayBuffer();
