@@ -17,8 +17,8 @@ export async function POST(request: Request) {
         // Random seed for variety
         const seed = Math.floor(Math.random() * 1000000);
 
-        // Final URL construction
-        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
+        // Final URL construction (using default model for speed and reliability)
+        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
 
         // We use a local proxy to bypass any potential network/CORS issues
         const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(pollinationsUrl)}`;

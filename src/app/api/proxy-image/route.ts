@@ -9,24 +9,30 @@ export async function GET(request: Request) {
     }
 
     try {
-        console.log(`Proxying image: ${imageUrl}`);
-        const response = await fetch(imageUrl);
+        console.log(`[PROXY] Fetching: ${imageUrl}`);
+        const response = await fetch(imageUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            },
+            next: { revalidate: 0 }
+        });
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch image: ${response.statusText}`);
+            console.error(`[PROXY] Source failed: ${response.status} ${response.statusText}`);
+            return new Response(`Error: ${response.status}`, { status: response.status });
         }
 
-        const blob = await response.blob();
-        const contentType = response.headers.get('content-type') || 'image/png';
+        const arrayBuffer = await response.arrayBuffer();
+        const contentType = response.headers.get('content-type') || 'image/jpeg';
 
-        return new Response(blob, {
+        return new Response(arrayBuffer, {
             headers: {
                 'Content-Type': contentType,
-                'Cache-Control': 'public, max-age=86400',
+                'Cache-Control': 'no-store, no-cache, must-revalidate',
             },
         });
     } catch (error) {
-        console.error('Proxy error:', error);
-        return new Response('Failed to load image', { status: 500 });
+        console.error('[PROXY] Fatal error:', error);
+        return new Response('Proxy error', { status: 500 });
     }
 }
