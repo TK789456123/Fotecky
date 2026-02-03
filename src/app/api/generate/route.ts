@@ -4,15 +4,18 @@ export async function POST(request: Request) {
     try {
         const { prompt } = await request.json();
 
-        // Loop mock waiting time to simulate generation
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        if (!prompt) {
+            return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+        }
 
-        // Return a random cool image from Unsplash based on keywords if we could, but for now fixed or random
-        const randomSeed = Math.floor(Math.random() * 1000);
-        // Using simple unsplash source for variety
-        const mockImageUrl = `https://picsum.photos/seed/${randomSeed}/1024/1024`;
+        // Connect to Pollinations.ai for real image generation
+        // We encode the prompt to be URL-safe
+        const encodedPrompt = encodeURIComponent(prompt);
+        // Using a random seed for variety and appending styling keywords for "premium" look
+        const seed = Math.floor(Math.random() * 1000000);
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}%20highly%20detailed,%204k,%20cinematic%20lighting?width=1024&height=1024&nologo=true&seed=${seed}`;
 
-        return NextResponse.json({ url: mockImageUrl });
+        return NextResponse.json({ url: imageUrl });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to generate' }, { status: 500 });
     }
