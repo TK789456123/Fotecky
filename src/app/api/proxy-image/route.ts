@@ -65,8 +65,4 @@ export async function GET(request: Request) {
         console.error('[PROXY] Fatal error:', error);
         return new Response('Proxy unreachable', { status: 500 });
     }
-} catch (error) {
-    console.error('[PROXY] Fatal error:', error);
-    return new Response('Proxy error', { status: 500 });
-}
 }
