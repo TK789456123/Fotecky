@@ -7,6 +7,7 @@ import { Wand2, Download, Share2, Sparkles } from "lucide-react";
 export default function ImageGenerator() {
     const [prompt, setPrompt] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isImageLoading, setIsImageLoading] = useState(false);
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
     const handleGenerate = async () => {
@@ -25,6 +26,7 @@ export default function ImageGenerator() {
 
             if (data.url) {
                 setGeneratedImage(data.url);
+                setIsImageLoading(true);
             }
         } catch (error) {
             console.error("Failed to generate:", error);
@@ -49,10 +51,10 @@ export default function ImageGenerator() {
                     />
                     <button
                         onClick={handleGenerate}
-                        disabled={isLoading || !prompt}
+                        disabled={isLoading || isImageLoading || !prompt}
                         className="bg-white text-black px-6 py-3 rounded-md font-bold hover:bg-gray-200 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isLoading ? (
+                        {(isLoading || isImageLoading) ? (
                             <span className="animate-spin">⏳</span>
                         ) : (
                             <>
@@ -65,46 +67,49 @@ export default function ImageGenerator() {
             </div>
 
             {/* Result Display */}
-            <AnimatePresence>
-                {(isLoading || generatedImage) && (
+            <AnimatePresence mode="wait">
+                {(isLoading || isImageLoading || generatedImage) && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
+                        key={generatedImage || 'loading'}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
                         className="mt-12 relative"
                     >
-                        {isLoading && (
-                            <div className="flex flex-col items-center justify-center p-12 space-y-4">
+                        {(isLoading || isImageLoading) && (
+                            <div className="flex flex-col items-center justify-center p-12 space-y-4 glass-panel rounded-xl">
                                 <div className="relative">
                                     <div className="w-24 h-24 border-4 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin"></div>
                                     <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-yellow-400 animate-pulse" />
                                 </div>
-                                <p className="text-gray-400 animate-pulse">Dreaming up your masterpiece...</p>
+                                <p className="text-gray-400 animate-pulse">
+                                    {isImageLoading ? "Almost there, perfecting the pixels..." : "Dreaming up your masterpiece..."}
+                                </p>
                             </div>
                         )}
 
-                        {generatedImage && !isLoading && (
-                            <motion.div
-                                className="relative rounded-xl overflow-hidden shadow-2xl border border-white/10 group"
-                                initial={{ scale: 0.95 }}
-                                animate={{ scale: 1 }}
-                            >
-                                <img
-                                    src={generatedImage}
-                                    alt={prompt}
-                                    className="w-full h-auto object-cover max-h-[600px] min-h-[300px] bg-white/5"
-                                    loading="lazy"
-                                />
+                        {generatedImage && (
+                            <div className={isImageLoading ? "invisible absolute h-0 w-0" : "visible"}>
+                                <motion.div className="relative rounded-xl overflow-hidden shadow-2xl border border-white/10 group">
+                                    <img
+                                        src={generatedImage}
+                                        alt={prompt}
+                                        onLoad={() => setIsImageLoading(false)}
+                                        onError={() => setIsImageLoading(false)}
+                                        className="w-full h-auto object-cover max-h-[600px] min-h-[300px] bg-white/5"
+                                        loading="lazy"
+                                    />
 
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                                    <button className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all">
-                                        <Download size={24} />
-                                    </button>
-                                    <button className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all">
-                                        <Share2 size={24} />
-                                    </button>
-                                </div>
-                            </motion.div>
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                                        <a href={generatedImage} target="_blank" rel="noopener noreferrer" className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all">
+                                            <Download size={24} />
+                                        </a>
+                                        <button className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all">
+                                            <Share2 size={24} />
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            </div>
                         )}
                     </motion.div>
                 )}
