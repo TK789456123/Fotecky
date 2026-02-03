@@ -1,3 +1,5 @@
+import { NextResponse } from 'next/server';
+
 async function translateToEnglish(text: string) {
     try {
         // Use Google's public gtx client for real-time translation
