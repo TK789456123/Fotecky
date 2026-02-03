@@ -71,42 +71,60 @@ export default function ImageGenerator() {
                 {(isLoading || isImageLoading || generatedImage) && (
                     <motion.div
                         key={generatedImage || 'loading'}
-                        initial={{ opacity: 0, scale: 0.95 }}
+                        initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
                         className="mt-12 relative"
                     >
+                        {/* Loading State */}
                         {(isLoading || isImageLoading) && (
-                            <div className="flex flex-col items-center justify-center p-12 space-y-4 glass-panel rounded-xl">
-                                <div className="relative">
-                                    <div className="w-24 h-24 border-4 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin"></div>
-                                    <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-yellow-400 animate-pulse" />
+                            <div className="flex flex-col items-center justify-center p-20 glass-panel rounded-xl border border-white/10 mb-4">
+                                <div className="relative mb-6">
+                                    <div className="w-16 h-16 border-4 border-yellow-400/20 border-t-yellow-400 rounded-full animate-spin"></div>
+                                    <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-yellow-400" size={24} />
                                 </div>
-                                <p className="text-gray-400 animate-pulse">
-                                    {isImageLoading ? "Almost there, perfecting the pixels..." : "Dreaming up your masterpiece..."}
+                                <p className="text-yellow-400 font-medium animate-pulse">
+                                    {isImageLoading ? "Perfecting the banana pixels..." : "Nano Banana is thinking..."}
                                 </p>
                             </div>
                         )}
 
+                        {/* Image Result */}
                         {generatedImage && (
-                            <div className={isImageLoading ? "invisible absolute h-0 w-0" : "visible"}>
-                                <motion.div className="relative rounded-xl overflow-hidden shadow-2xl border border-white/10 group">
+                            <div className={isImageLoading ? "hidden" : "block"}>
+                                <motion.div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 group bg-black/40">
                                     <img
                                         src={generatedImage}
                                         alt={prompt}
                                         onLoad={() => setIsImageLoading(false)}
-                                        onError={() => setIsImageLoading(false)}
-                                        className="w-full h-auto object-cover max-h-[600px] min-h-[300px] bg-white/5"
-                                        loading="lazy"
+                                        onError={() => {
+                                            setIsImageLoading(false);
+                                            console.error("Image failed to load");
+                                        }}
+                                        className="w-full h-auto object-cover max-h-[700px] min-h-[400px]"
                                     />
 
-                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                                        <a href={generatedImage} target="_blank" rel="noopener noreferrer" className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all">
-                                            <Download size={24} />
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6">
+                                        <a
+                                            href={generatedImage}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-4 bg-white text-black rounded-full hover:scale-110 transition-transform shadow-xl"
+                                            title="Download Image"
+                                        >
+                                            <Download size={28} />
                                         </a>
-                                        <button className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all">
-                                            <Share2 size={24} />
+                                        <button
+                                            className="p-4 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full hover:scale-110 transition-transform shadow-xl"
+                                            onClick={() => navigator.clipboard.writeText(generatedImage || '')}
+                                            title="Copy Link"
+                                        >
+                                            <Share2 size={28} />
                                         </button>
+                                    </div>
+
+                                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                                        <p className="text-white font-medium opacity-80 line-clamp-1">{prompt}</p>
                                     </div>
                                 </motion.div>
                             </div>
