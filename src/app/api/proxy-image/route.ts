@@ -12,6 +12,27 @@ export async function GET(request: Request) {
         return new Response('Missing URL parameter', { status: 400 });
     }
 
+    // Smart Translation for Fallback (Czech to English)
+    const translate = (txt: string) => {
+        const dict: Record<string, string> = {
+            'banan': 'banana',
+            'banán': 'banana',
+            'pes': 'dog',
+            'kocka': 'cat',
+            'kočka': 'cat',
+            'auto': 'car',
+            'clovek': 'person',
+            'člověk': 'person',
+            'strom': 'tree',
+            'dum': 'house',
+            'dům': 'house'
+        };
+        const lower = txt.toLowerCase();
+        return dict[lower] || txt;
+    };
+
+    const translatedQuery = translate(query);
+
     const fastFetch = async (url: string, timeout = 3000): Promise<Response | null> => {
         try {
             console.log(`[PROXY] Fetching (timeout ${timeout}ms): ${url}`);
@@ -47,8 +68,8 @@ export async function GET(request: Request) {
 
         // ABSOLUTE LAST RESORT: High-quality professional photo based on user query
         if (!response) {
-            console.log(`[PROXY] Everything failed. Using dynamic Unsplash fallback for: ${query}`);
-            const unsplashFallback = `https://loremflickr.com/1024/1024/${encodeURIComponent(query.split(' ').slice(0, 2).join(','))}`;
+            console.log(`[PROXY] Everything failed. Using dynamic fallback for: ${translatedQuery}`);
+            const unsplashFallback = `https://loremflickr.com/1024/1024/${encodeURIComponent(translatedQuery.split(' ').slice(0, 2).join(','))}`;
             response = await fetch(unsplashFallback);
         }
 
