@@ -21,6 +21,13 @@ export async function GET(request: Request) {
 
             if (response.ok) return response;
             console.warn(`[PROXY] Failed (${response.status}): ${url}`);
+
+            // SECONDARY BYPASS: Try via weserv.nl (Global Proxy) to bypass Vercel IP blocks
+            const weservUrl = `https://images.weserv.nl/?url=${encodeURIComponent(url)}&default=${encodeURIComponent(url)}`;
+            console.log(`[PROXY] Retrying via Weserv: ${weservUrl}`);
+            const weservResponse = await fetch(weservUrl);
+            if (weservResponse.ok) return weservResponse;
+
             return null;
         } catch (e) {
             console.error(`[PROXY] Error fetching: ${url}`, e);
@@ -33,12 +40,13 @@ export async function GET(request: Request) {
 
         // If primary fails (502, 404, etc), try backup
         if (!response && backupUrl) {
-            console.log(`[PROXY] Primary failed, trying backup...`);
+            console.log(`[PROXY] Primary + Weserv failed, trying backup...`);
             response = await tryFetch(backupUrl);
         }
 
         if (!response) {
-            return new Response('All AI providers are currently busy. Please try again in a moment.', { status: 503 });
+            console.log(`[PROXY] All server-side attempts failed. Redirecting browser to direct URL...`);
+            return NextResponse.redirect(imageUrl, { status: 302 });
         }
 
         const arrayBuffer = await response.arrayBuffer();
