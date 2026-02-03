@@ -18,9 +18,12 @@ export async function POST(request: Request) {
         const seed = Math.floor(Math.random() * 1000000);
 
         // Final URL construction
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
+        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
 
-        return NextResponse.json({ url: imageUrl });
+        // We use a local proxy to bypass any potential network/CORS issues
+        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(pollinationsUrl)}`;
+
+        return NextResponse.json({ url: proxyUrl });
     } catch (error) {
         return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
