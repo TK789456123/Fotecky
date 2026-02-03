@@ -4,6 +4,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const imageUrl = searchParams.get('url');
     const backupUrl = searchParams.get('backup');
+    const emergencyUrl = searchParams.get('emergency');
 
     if (!imageUrl) {
         return new Response('Missing URL parameter', { status: 400 });
@@ -19,7 +20,8 @@ export async function GET(request: Request) {
                         'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
                         'Cache-Control': 'no-cache',
                     },
-                    next: { revalidate: 0 }
+                    next: { revalidate: 0 },
+                    signal: AbortSignal.timeout(45000) // Increase timeout to 45s
                 });
 
                 if (response.ok) return response;
@@ -53,6 +55,12 @@ export async function GET(request: Request) {
         if (!response && backupUrl) {
             console.log(`[PROXY] Everything failed, trying backup...`);
             response = await fetchWithRetry(backupUrl);
+        }
+
+        // Try Emergency (Guaranteed CDN) if even backup failed
+        if (!response && emergencyUrl) {
+            console.log(`[PROXY] AI Providers dead. Using emergency fallback...`);
+            response = await fetch(emergencyUrl);
         }
 
         if (!response) {
