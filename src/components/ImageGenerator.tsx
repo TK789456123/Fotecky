@@ -96,10 +96,18 @@ export default function ImageGenerator() {
                                     <img
                                         src={generatedImage}
                                         alt={prompt}
-                                        onLoad={() => setIsImageLoading(false)}
-                                        onError={() => {
+                                        onLoad={() => {
+                                            console.log("Image loaded successfully");
                                             setIsImageLoading(false);
-                                            console.error("Image failed to load");
+                                        }}
+                                        onError={(e) => {
+                                            setIsImageLoading(false);
+                                            console.error("Image failed to load via proxy");
+                                            // Fallback to direct URL if proxy fails
+                                            if (generatedImage.startsWith('/api/proxy-image')) {
+                                                const originalUrl = new URLSearchParams(generatedImage.split('?')[1]).get('url');
+                                                if (originalUrl) setGeneratedImage(originalUrl);
+                                            }
                                         }}
                                         className="w-full h-auto object-cover max-h-[700px] min-h-[400px]"
                                     />
@@ -110,21 +118,20 @@ export default function ImageGenerator() {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="p-4 bg-white text-black rounded-full hover:scale-110 transition-transform shadow-xl"
-                                            title="Download Image"
                                         >
                                             <Download size={28} />
                                         </a>
-                                        <button
-                                            className="p-4 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full hover:scale-110 transition-transform shadow-xl"
-                                            onClick={() => navigator.clipboard.writeText(generatedImage || '')}
-                                            title="Copy Link"
-                                        >
-                                            <Share2 size={28} />
-                                        </button>
                                     </div>
 
-                                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
-                                        <p className="text-white font-medium opacity-80 line-clamp-1">{prompt}</p>
+                                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/60 backdrop-blur-sm text-center">
+                                        <p className="text-white/60 text-xs mb-1">Click below if image doesn't appear:</p>
+                                        <a
+                                            href={generatedImage}
+                                            target="_blank"
+                                            className="text-yellow-400 text-sm font-bold hover:underline"
+                                        >
+                                            Direct Image Link 🔗
+                                        </a>
                                     </div>
                                 </motion.div>
                             </div>
