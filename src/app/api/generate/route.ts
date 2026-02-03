@@ -8,18 +8,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
         }
 
-        // Connect to Pollinations.ai for real image generation
-        const enhancedPrompt = `${prompt}, unreal engine 5, cinematic, high resolution, 8k, vibrant colors, neon accents`;
+        // Ghost Mode Enhancement: High quality without triggering filters
+        const enhancedPrompt = `${prompt}, high quality, masterpiece, 8k, cinematic`;
         const encodedPrompt = encodeURIComponent(enhancedPrompt);
-        const seed = Math.floor(Math.random() * 1000000);
+        const seed = Math.floor(Math.random() * 10000000);
 
-        // Primary URL (Direct subdomain)
-        const primaryUrl = `https://pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
+        // We use the 'turbo' model which is free and very fast
+        const primaryUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=turbo`;
+        const backupUrl = `https://pollinations.ai/p/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=turbo`;
 
-        // Backup URL (Image subdomain)
-        const backupUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
-
-        // We use a local proxy to bypass any potential network/CORS issues and provide fallback
+        // Local proxy for reliability and automatic fallback
         const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(primaryUrl)}&backup=${encodeURIComponent(backupUrl)}`;
 
         return NextResponse.json({ url: proxyUrl });
