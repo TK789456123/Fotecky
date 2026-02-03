@@ -9,19 +9,18 @@ export async function POST(request: Request) {
         }
 
         // Connect to Pollinations.ai for real image generation
-        // Append keywords to ensure high quality and specific "Nano Banana" aesthetic
-        // We add "banana" if it's not present to ensure the theme
         const enhancedPrompt = `${prompt}, unreal engine 5, cinematic, high resolution, 8k, vibrant colors, neon accents`;
         const encodedPrompt = encodeURIComponent(enhancedPrompt);
-
-        // Random seed for variety
         const seed = Math.floor(Math.random() * 1000000);
 
-        // Final URL construction (using default model for speed and reliability)
-        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
+        // Primary URL (Direct subdomain)
+        const primaryUrl = `https://pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
 
-        // We use a local proxy to bypass any potential network/CORS issues
-        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(pollinationsUrl)}`;
+        // Backup URL (Image subdomain)
+        const backupUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
+
+        // We use a local proxy to bypass any potential network/CORS issues and provide fallback
+        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(primaryUrl)}&backup=${encodeURIComponent(backupUrl)}`;
 
         return NextResponse.json({ url: proxyUrl });
     } catch (error) {
