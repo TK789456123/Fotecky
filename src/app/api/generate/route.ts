@@ -1,4 +1,19 @@
-import { NextResponse } from 'next/server';
+async function translateToEnglish(text: string) {
+    try {
+        // Use Google's public gtx client for real-time translation
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=cs&tl=en&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url, { next: { revalidate: 3600 } });
+        const data = await res.json();
+        // Google returns: [ [[translated, original, ...]], ... ]
+        if (data && data[0] && data[0][0] && data[0][0][0]) {
+            return data[0][0][0];
+        }
+        return text;
+    } catch (e) {
+        console.error("[TRANSLATOR] Error:", e);
+        return text;
+    }
+}
 
 export async function POST(request: Request) {
     try {
@@ -8,30 +23,9 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
         }
 
-        // Universal Translator (Czech to English) - Applied first to fix fallback relevance
-        let translatedPrompt = prompt.toLowerCase();
-        const translationDict: Record<string, string> = {
-            'banán': 'banana',
-            'banan': 'banana',
-            'pes': 'dog',
-            'kočka': 'cat',
-            'kocka': 'cat',
-            'auto': 'car',
-            'člověk': 'person',
-            'clovek': 'person',
-            'strom': 'tree',
-            'dům': 'house',
-            'dum': 'house',
-            'moře': 'sea',
-            'hory': 'mountains',
-            'slunce': 'sun',
-            'město': 'city'
-        };
-
-        Object.entries(translationDict).forEach(([cz, en]) => {
-            const regex = new RegExp(`\\b${cz}\\b`, 'gi');
-            translatedPrompt = translatedPrompt.replace(regex, en);
-        });
+        // Real-time translation for ALL words
+        const translatedPrompt = await translateToEnglish(prompt);
+        console.log(`[TRANSLATOR] ${prompt} -> ${translatedPrompt}`);
 
         // Chameleon Strategy: Scrubbing sensitive keywords but preserving meaning for AI
         let scrubbedPrompt = translatedPrompt;
