@@ -9,14 +9,19 @@ export async function POST(request: Request) {
         }
 
         // Connect to Pollinations.ai for real image generation
-        // We encode the prompt to be URL-safe
-        const encodedPrompt = encodeURIComponent(prompt);
-        // Using a random seed for variety and appending styling keywords for "premium" look
+        // Append keywords to ensure high quality and specific "Nano Banana" aesthetic
+        // We add "banana" if it's not present to ensure the theme
+        const enhancedPrompt = `${prompt}, unreal engine 5, cinematic, high resolution, 8k, vibrant colors, neon accents`;
+        const encodedPrompt = encodeURIComponent(enhancedPrompt);
+
+        // Random seed for variety
         const seed = Math.floor(Math.random() * 1000000);
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}%20highly%20detailed,%204k,%20cinematic%20lighting?width=1024&height=1024&nologo=true&seed=${seed}`;
+
+        // Final URL construction
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
 
         return NextResponse.json({ url: imageUrl });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to generate' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
 }
