@@ -102,9 +102,10 @@ export default function ImageGenerator() {
                                         }}
                                         onError={(e) => {
                                             setIsImageLoading(false);
-                                            console.warn("Image recovery active: Proxy failed, using Unsplash shield.");
-                                            // Fallback to guaranteed Unsplash image instead of failing AI source
-                                            setGeneratedImage('https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1024&q=80');
+                                            console.warn("Image recovery active: Proxy failed, using dynamic shield.");
+                                            // Fallback to guaranteed relevant image instead of hardcoded banana
+                                            const query = prompt || 'nature';
+                                            setGeneratedImage(`https://loremflickr.com/1024/1024/${encodeURIComponent(query.split(' ').slice(0, 2).join(','))}`);
                                         }}
                                         className="w-full h-auto object-cover max-h-[700px] min-h-[400px]"
                                     />

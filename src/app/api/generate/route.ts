@@ -24,7 +24,7 @@ export async function POST(request: Request) {
         const backup2 = `https://loremflickr.com/1024/1024/${encodeURIComponent(prompt.split(' ').slice(0, 2).join(','))}`;
 
         // Local proxy for reliability and automatic fallback
-        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(primaryUrl)}&backup=${encodeURIComponent(backup1)}&emergency=${encodeURIComponent(backup2)}`;
+        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(primaryUrl)}&backup=${encodeURIComponent(backup1)}&emergency=${encodeURIComponent(backup2)}&q=${encodeURIComponent(prompt)}`;
 
         return NextResponse.json({ url: proxyUrl });
     } catch (error) {

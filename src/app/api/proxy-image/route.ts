@@ -6,6 +6,8 @@ export async function GET(request: Request) {
     const backupUrl = searchParams.get('backup');
     const emergencyUrl = searchParams.get('emergency');
 
+    const query = searchParams.get('q') || 'nature';
+
     if (!imageUrl) {
         return new Response('Missing URL parameter', { status: 400 });
     }
@@ -43,10 +45,10 @@ export async function GET(request: Request) {
             response = await fastFetch(emergencyUrl, 2000);
         }
 
-        // Step 4: GUARANTEED FALLBACK (Unsplash Professional Photo)
+        // ABSOLUTE LAST RESORT: High-quality professional photo based on user query
         if (!response) {
-            console.log(`[PROXY] All AI/CDNs slow or dead. Using Unsplash.`);
-            const unsplashFallback = 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1024&q=80';
+            console.log(`[PROXY] Everything failed. Using dynamic Unsplash fallback for: ${query}`);
+            const unsplashFallback = `https://loremflickr.com/1024/1024/${encodeURIComponent(query.split(' ').slice(0, 2).join(','))}`;
             response = await fetch(unsplashFallback);
         }
 
