@@ -8,12 +8,35 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
         }
 
+        // Universal Translator (Czech to English) - Applied first to fix fallback relevance
+        let translatedPrompt = prompt.toLowerCase();
+        const translationDict: Record<string, string> = {
+            'banán': 'banana',
+            'banan': 'banana',
+            'pes': 'dog',
+            'kočka': 'cat',
+            'kocka': 'cat',
+            'auto': 'car',
+            'člověk': 'person',
+            'clovek': 'person',
+            'strom': 'tree',
+            'dům': 'house',
+            'dum': 'house',
+            'moře': 'sea',
+            'hory': 'mountains',
+            'slunce': 'sun',
+            'město': 'city'
+        };
+
+        Object.entries(translationDict).forEach(([cz, en]) => {
+            const regex = new RegExp(`\\b${cz}\\b`, 'gi');
+            translatedPrompt = translatedPrompt.replace(regex, en);
+        });
+
         // Chameleon Strategy: Scrubbing sensitive keywords but preserving meaning for AI
-        let scrubbedPrompt = prompt;
+        let scrubbedPrompt = translatedPrompt;
         const replacements: Record<string, string> = {
             'banana': 'yellow tropical fruit',
-            'banán': 'žluté tropické ovoce',
-            'banan': 'žluté tropické ovoce',
             'nano': 'microscopic',
         };
 
@@ -34,10 +57,10 @@ export async function POST(request: Request) {
         const backup1 = `https://pollinations.ai/p/${encodedPrompt}?width=1024&height=1024&seed=${seed}`;
 
         // Backup 2: LoremFlickr (Guaranteed to work, high quality static-ish images)
-        const backup2 = `https://loremflickr.com/1024/1024/${encodeURIComponent(prompt.split(' ').slice(0, 2).join(','))}`;
+        const backup2 = `https://loremflickr.com/1024/1024/${encodeURIComponent(translatedPrompt.split(' ').slice(0, 2).join(','))}`;
 
         // Local proxy for reliability and automatic fallback
-        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(primaryUrl)}&backup=${encodeURIComponent(backup1)}&emergency=${encodeURIComponent(backup2)}&q=${encodeURIComponent(prompt)}`;
+        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(primaryUrl)}&backup=${encodeURIComponent(backup1)}&emergency=${encodeURIComponent(backup2)}&q=${encodeURIComponent(translatedPrompt)}`;
 
         return NextResponse.json({ url: proxyUrl });
     } catch (error) {
