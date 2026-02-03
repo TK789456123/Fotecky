@@ -62,7 +62,19 @@ export async function GET(request: Request) {
             },
         });
     } catch (error) {
-        console.error('[PROXY] Fatal error:', error);
-        return new Response('Proxy unreachable', { status: 500 });
+        console.error('[PROXY] Fatal error. Returning emergency shield.', error);
+        // FORCE 200 with a guaranteed image
+        const unsplashFallback = 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1024&q=80';
+        const finalResponse = await fetch(unsplashFallback);
+        const arrayBuffer = await finalResponse.arrayBuffer();
+
+        return new Response(arrayBuffer, {
+            headers: {
+                'Content-Type': 'image/jpeg',
+                'Cache-Control': 'no-store',
+                'X-Shield': 'Active'
+            },
+            status: 200
+        });
     }
 }
