@@ -9,43 +9,54 @@ export async function GET(request: Request) {
         return new Response('Missing URL parameter', { status: 400 });
     }
 
-    const tryFetch = async (url: string) => {
-        try {
-            console.log(`[PROXY] Attempting: ${url}`);
-            const response = await fetch(url, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'
-                },
-                next: { revalidate: 0 }
-            });
+    const fetchWithRetry = async (url: string, retries = 3, delay = 1000): Promise<Response | null> => {
+        for (let i = 0; i < retries; i++) {
+            try {
+                console.log(`[PROXY] Attempt ${i + 1} for: ${url}`);
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+                        'Cache-Control': 'no-cache',
+                    },
+                    next: { revalidate: 0 }
+                });
 
-            if (response.ok) return response;
-            console.warn(`[PROXY] Failed (${response.status}): ${url}`);
+                if (response.ok) return response;
 
-            // SECONDARY BYPASS: Try via weserv.nl (Global Proxy) to bypass Vercel IP blocks
-            const weservUrl = `https://images.weserv.nl/?url=${encodeURIComponent(url)}&default=${encodeURIComponent(url)}`;
-            console.log(`[PROXY] Retrying via Weserv: ${weservUrl}`);
-            const weservResponse = await fetch(weservUrl);
-            if (weservResponse.ok) return weservResponse;
-
-            return null;
-        } catch (e) {
-            console.error(`[PROXY] Error fetching: ${url}`, e);
-            return null;
+                if (response.status >= 500) {
+                    console.warn(`[PROXY] Status ${response.status}, retrying in ${delay}ms...`);
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                    continue;
+                }
+                return null;
+            } catch (e) {
+                console.error(`[PROXY] Error:`, e);
+                await new Promise(r => setTimeout(r, delay));
+            }
         }
+        return null;
     };
 
     try {
-        let response = await tryFetch(imageUrl);
+        let response = await fetchWithRetry(imageUrl);
 
-        // If primary fails (502, 404, etc), try backup
+        // Try Weserv bypass if primary failed
+        if (!response) {
+            console.log(`[PROXY] Primary failed. Trying Weserv...`);
+            const weservUrl = `https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}&default=${encodeURIComponent(imageUrl)}`;
+            response = await fetchWithRetry(weservUrl, 2);
+        }
+
+        // Try Backup if everything else failed
         if (!response && backupUrl) {
-            console.log(`[PROXY] Primary + Weserv failed, trying backup...`);
-            response = await tryFetch(backupUrl);
+            console.log(`[PROXY] Everything failed, trying backup...`);
+            response = await fetchWithRetry(backupUrl);
         }
 
         if (!response) {
-            console.log(`[PROXY] All server-side attempts failed. Redirecting browser to direct URL...`);
+            console.log(`[PROXY] Fatal failure. Final browser redirect.`);
             return NextResponse.redirect(imageUrl, { status: 302 });
         }
 
