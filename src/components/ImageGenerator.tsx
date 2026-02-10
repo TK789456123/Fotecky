@@ -9,6 +9,14 @@ export default function ImageGenerator() {
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [history, setHistory] = useState<string[]>([]);
+
+    const addToHistory = (url: string) => {
+        setHistory(prev => {
+            if (prev.includes(url)) return prev;
+            return [url, ...prev].slice(0, 3);
+        });
+    };
 
     const handleGenerate = async () => {
         try {
@@ -101,7 +109,10 @@ export default function ImageGenerator() {
                                     <img
                                         src={generatedImage}
                                         alt="Random World"
-                                        onLoad={() => setIsImageLoading(false)}
+                                        onLoad={() => {
+                                            setIsImageLoading(false);
+                                            if (generatedImage) addToHistory(generatedImage);
+                                        }}
                                         onError={() => {
                                             setIsImageLoading(false);
                                             setError("Obrázek se nepodařilo načíst (Network error).");
@@ -128,6 +139,40 @@ export default function ImageGenerator() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* History Section */}
+            {history.length > 0 && (
+                <div className="mt-20 w-full">
+                    <h3 className="text-white/40 text-sm font-bold tracking-widest uppercase mb-6 flex items-center gap-4 py-4">
+                        <span className="h-[1px] flex-1 bg-white/10"></span>
+                        Poslední úlovky
+                        <span className="h-[1px] flex-1 bg-white/10"></span>
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                        {history.map((url, i) => (
+                            <motion.div
+                                key={url}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-white/5 hover:border-white/30 transition-all cursor-pointer group"
+                                onClick={() => setGeneratedImage(url)}
+                            >
+                                <img src={url} alt="History" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <Sparkles className="text-white" size={24} />
+                                </div>
+                            </motion.div>
+                        ))}
+                        {/* Placeholder slots to keep the 3-grid look */}
+                        {Array.from({ length: 3 - history.length }).map((_, i) => (
+                            <div key={`empty-${i}`} className="aspect-square rounded-xl border border-dashed border-white/5 flex items-center justify-center">
+                                <span className="text-white/5 text-xs font-black">SLOT #{history.length + i + 1}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

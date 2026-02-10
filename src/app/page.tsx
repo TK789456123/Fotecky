@@ -16,14 +16,6 @@ export default function Home() {
         </div>
 
         <ImageGenerator />
-
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 w-full opacity-50 hover:opacity-100 transition-opacity duration-500">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="aspect-square rounded-lg bg-white/5 border border-white/10 p-4 flex items-center justify-center">
-              <span className="text-sm text-gray-500">Freatured Art #{i}</span>
-            </div>
-          ))}
-        </div>
       </div>
 
       <footer className="absolute bottom-4 text-gray-600 text-sm z-10">
