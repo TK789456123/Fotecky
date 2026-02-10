@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wand2, Download, Share2, Sparkles } from "lucide-react";
+import { Wand2, Download, Share2, Sparkles, Loader2 } from "lucide-react";
 
 export default function ImageGenerator() {
     const [prompt, setPrompt] = useState("");
