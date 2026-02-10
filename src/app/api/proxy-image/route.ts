@@ -47,10 +47,10 @@ export async function GET(request: Request) {
             response = await fastFetch(emergencyUrl, 2000);
         }
 
-        // ABSOLUTE LAST RESORT: High-quality professional photo based on user query
+        // ABSOLUTE LAST RESORT: High-quality professional photo based on user query (Unsplash)
         if (!response) {
-            console.log(`[PROXY] Everything failed. Using dynamic fallback for: ${translatedQuery}`);
-            const unsplashFallback = `https://loremflickr.com/1024/1024/${encodeURIComponent(translatedQuery.split(' ').slice(0, 2).join(','))}`;
+            console.log(`[PROXY] Everything failed. Using dynamic Unsplash fallback for: ${translatedQuery}`);
+            const unsplashFallback = `https://source.unsplash.com/featured/1024x1024?${encodeURIComponent(translatedQuery)}`;
             response = await fetch(unsplashFallback);
         }
 
