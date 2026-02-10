@@ -9,42 +9,45 @@ export default function ImageGenerator() {
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [history, setHistory] = useState<string[]>([]);
-
-    // 1. Load history from localStorage on mount
-    useEffect(() => {
-        const saved = localStorage.getItem("nano_history");
-        if (saved) {
-            try {
-                setHistory(JSON.parse(saved).slice(0, 3));
-            } catch (e) {
-                console.error("Failed to load history", e);
+    const [history, setHistory] = useState<string[]>(() => {
+        if (typeof window !== "undefined") {
+            const saved = localStorage.getItem("nano_history");
+            if (saved) {
+                try {
+                    return JSON.parse(saved).slice(0, 3);
+                } catch (e) {
+                    console.error("Failed to parse history", e);
+                }
             }
         }
-    }, []);
+        return [];
+    });
 
-    // 2. Save history to localStorage on change
-    useEffect(() => {
-        localStorage.setItem("nano_history", JSON.stringify(history));
-    }, [history]);
-
-    // 3. Security Timeout: If image takes more than 10s to load, force clear the loading state
+    // 2. Clear loading state safety
     useEffect(() => {
         let timeout: NodeJS.Timeout;
         if (isImageLoading) {
             timeout = setTimeout(() => {
-                console.warn("[STABILITY] Image load timeout. Forcing UI update.");
                 setIsImageLoading(false);
-            }, 15000);
+            }, 10000);
         }
         return () => clearTimeout(timeout);
     }, [isImageLoading]);
 
+    // 3. Save history to localStorage on change
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            localStorage.setItem("nano_history", JSON.stringify(history));
+        }
+    }, [history]);
+
     const addToHistory = (url: string) => {
         if (!url) return;
         setHistory(prev => {
+            // Keep unique items, newest first, limit to 3
             const filtered = prev.filter(item => item !== url);
-            return [url, ...filtered].slice(0, 3);
+            const newList = [url, ...filtered].slice(0, 3);
+            return newList;
         });
     };
 
