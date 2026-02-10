@@ -11,14 +11,31 @@ export default function ImageGenerator() {
     const [error, setError] = useState<string | null>(null);
     const [history, setHistory] = useState<string[]>([]);
 
-    // Security Timeout: If image takes more than 10s to load, force clear the loading state
+    // 1. Load history from localStorage on mount
+    useEffect(() => {
+        const saved = localStorage.getItem("nano_history");
+        if (saved) {
+            try {
+                setHistory(JSON.parse(saved).slice(0, 3));
+            } catch (e) {
+                console.error("Failed to load history", e);
+            }
+        }
+    }, []);
+
+    // 2. Save history to localStorage on change
+    useEffect(() => {
+        localStorage.setItem("nano_history", JSON.stringify(history));
+    }, [history]);
+
+    // 3. Security Timeout: If image takes more than 10s to load, force clear the loading state
     useEffect(() => {
         let timeout: NodeJS.Timeout;
         if (isImageLoading) {
             timeout = setTimeout(() => {
                 console.warn("[STABILITY] Image load timeout. Forcing UI update.");
                 setIsImageLoading(false);
-            }, 10000); // 10 seconds hard limit
+            }, 15000);
         }
         return () => clearTimeout(timeout);
     }, [isImageLoading]);
@@ -26,8 +43,8 @@ export default function ImageGenerator() {
     const addToHistory = (url: string) => {
         if (!url) return;
         setHistory(prev => {
-            if (prev[0] === url) return prev;
-            return [url, ...prev].slice(0, 3);
+            const filtered = prev.filter(item => item !== url);
+            return [url, ...filtered].slice(0, 3);
         });
     };
 
