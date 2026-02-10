@@ -13,73 +13,27 @@ async function translateToEnglish(text: string) {
         return text;
     } catch (e) {
         console.error("[TRANSLATOR] Error:", e);
-        return text;
-    }
-}
+        export async function POST(request: Request) {
+            try {
+                // --- STEP 1: Generate Fresh Randomness ---
+                const seed = Math.floor(Math.random() * 100000000);
 
-export async function POST(request: Request) {
-    try {
-        const { prompt } = await request.json();
+                // --- STEP 2: Build Pure Random URLs (Maximum Speed, Zero Search) ---
+                // Primary: Unsplash Random (High quality)
+                const primaryUrl = `https://source.unsplash.com/random/1024x1024?sig=${seed}`;
 
-        if (!prompt) {
-            return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+                // Backup 1: Picsum (Bleskově rychlá záloha)
+                const backup1 = `https://picsum.photos/1024/1024?random=${seed}`;
+
+                // Backup 2: LoremFlickr (Third layer defense)
+                const backup2 = `https://loremflickr.com/1024/1024?lock=${seed}`;
+
+                // --- STEP 3: Final Proxy Package ---
+                const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(primaryUrl)}&backup=${encodeURIComponent(backup1)}&emergency=${encodeURIComponent(backup2)}&q=random`;
+
+                return NextResponse.json({ url: proxyUrl });
+            } catch (error) {
+                console.error("[GENERATE] Error:", error);
+                return NextResponse.json({ error: 'Failed' }, { status: 500 });
+            }
         }
-
-        // --- STEP 1: Smart Translation (Local Dictionary First for Speed & Accuracy) ---
-        let processedPrompt = prompt.toLowerCase().trim();
-
-        const localDict: Record<string, string> = {
-            'banán': 'banana', 'banan': 'banana',
-            'pes': 'dog', 'psík': 'dog', 'stěně': 'puppy',
-            'kočka': 'cat', 'kocour': 'cat', 'kotě': 'kitten',
-            'auto': 'car', 'vůz': 'car',
-            'člověk': 'person', 'muž': 'man', 'žena': 'woman',
-            'strom': 'tree', 'les': 'forest',
-            'dům': 'house', 'budova': 'building',
-            'jetel': 'clover', 'čtyřlístek': 'clover',
-            'kytka': 'flower', 'kvvětina': 'flower', 'růže': 'rose',
-            'vesmír': 'space', 'galaxie': 'galaxy', 'hvězda': 'star',
-            'město': 'city', 'ulice': 'street',
-            'hory': 'mountains', 'kopec': 'hill',
-            'moře': 'sea', 'oceán': 'ocean', 'pláž': 'beach',
-            'slunce': 'sun', 'měsíc': 'moon',
-            'nebe': 'sky', 'mrak': 'cloud',
-            'voda': 'water', 'jezero': 'lake', 'řeka': 'river',
-            'oheň': 'fire', 'plamen': 'flame',
-            'hroch': 'hippo', 'lev': 'lion', 'tygr': 'tiger', 'slon': 'elephant',
-            'příroda': 'nature', 'krajina': 'landscape',
-            'jídlo': 'food', 'ovoce': 'fruit', 'zelenina': 'vegetables',
-            'hrad': 'castle', 'zámek': 'chateau',
-        };
-
-        // Quick local replacement
-        Object.entries(localDict).forEach(([cz, en]) => {
-            const regex = new RegExp(`\\b${cz}\\b`, 'gi');
-            processedPrompt = processedPrompt.replace(regex, en);
-        });
-
-        // --- STEP 2: Real-time Translation (For anything not in dictionary) ---
-        const translatedPrompt = await translateToEnglish(processedPrompt);
-        console.log(`[TRANSLATOR] ${prompt} -> ${translatedPrompt}`);
-
-        // --- STEP 3: Build Pure Internet URLs (Goodbye AI, Hello Speed) ---
-        const seed = Math.floor(Math.random() * 100000000);
-
-        // Primary: LoremFlickr (Highly reliable for simple keywords like "banana", "dog", etc.)
-        const primaryUrl = `https://loremflickr.com/1024/1024/${encodeURIComponent(translatedPrompt)}/all`;
-
-        // Backup 1: Unsplash (High quality photo source, used as fallback)
-        const backup1 = `https://source.unsplash.com/featured/1024x1024?${encodeURIComponent(translatedPrompt)}`;
-
-        // Backup 2: Dynamic Pattern (Absolute safety)
-        const backup2 = `https://picsum.photos/1024/1024?seed=${seed}`;
-
-        // --- STEP 4: Final Proxy Package ---
-        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(primaryUrl)}&backup=${encodeURIComponent(backup1)}&emergency=${encodeURIComponent(backup2)}&q=${encodeURIComponent(translatedPrompt)}`;
-
-        return NextResponse.json({ url: proxyUrl });
-    } catch (error) {
-        console.error("[GENERATE] Error:", error);
-        return NextResponse.json({ error: 'Failed' }, { status: 500 });
-    }
-}
