@@ -144,26 +144,23 @@ export default function ImageGenerator() {
             )}
 
             {/* Display Area */}
-            <div className="w-full min-h-[300px] mb-12">
+            <div className="w-full min-h-[300px] mb-12 relative">
                 <AnimatePresence mode="wait">
-                    {isLoading || isImageLoading ? (
+                    {/* Main API Loading Spinner (covers everything) */}
+                    {isLoading && (
                         <motion.div
-                            key="loading"
+                            key="api-loading"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="w-full aspect-video flex flex-col items-center justify-center glass-panel rounded-3xl border border-white/10 bg-black/40"
+                            className="absolute inset-0 z-50 flex flex-col items-center justify-center glass-panel rounded-3xl border border-white/10 bg-black/40"
                         >
                             <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
-                            <p className="text-white/60 font-medium tracking-widest text-sm uppercase">Přenáším moment z vesmíru...</p>
-                            <button
-                                onClick={() => setIsImageLoading(false)}
-                                className="mt-4 text-[10px] text-white/20 hover:text-white"
-                            >
-                                Zaseknuto? Zrušit čekání.
-                            </button>
+                            <p className="text-white/60 font-medium tracking-widest text-sm uppercase text-center px-4">Vyhledávám nejlepší záběr...</p>
                         </motion.div>
-                    ) : generatedImage ? (
+                    )}
+
+                    {generatedImage ? (
                         <motion.div
                             key={generatedImage}
                             initial={{ opacity: 0, scale: 0.98 }}
@@ -171,20 +168,26 @@ export default function ImageGenerator() {
                             className="w-full px-4"
                         >
                             <div className="relative rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 bg-black/40 group max-w-2xl mx-auto">
+                                {/* Image Fetching Spinner (Subtle Overlay) */}
+                                {isImageLoading && (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 backdrop-blur-[2px] z-10">
+                                        <div className="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+                                        <p className="text-white/40 text-[10px] tracking-widest uppercase">Přenáším z vesmíru...</p>
+                                    </div>
+                                )}
+
                                 <img
                                     src={generatedImage}
                                     alt="Random World"
-                                    onLoad={() => {
-                                        setIsImageLoading(false);
-                                    }}
+                                    onLoad={() => setIsImageLoading(false)}
                                     onError={() => {
                                         setIsImageLoading(false);
                                         setError("Obrázek se nepodařilo zobrazit (Network Error).");
                                     }}
-                                    className="w-full h-auto object-cover max-h-[70vh]"
+                                    className={`w-full h-auto object-cover max-h-[70vh] transition-all duration-500 ${isImageLoading ? 'scale-105 blur-sm opacity-50' : 'scale-100 blur-0 opacity-100'}`}
                                 />
 
-                                <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-center gap-4 translate-y-4 group-hover:translate-y-0 transition-transform opacity-0 group-hover:opacity-100">
+                                <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-center gap-4 translate-y-4 group-hover:translate-y-0 transition-transform opacity-0 group-hover:opacity-100 z-20">
                                     <a
                                         href={generatedImage}
                                         target="_blank"
