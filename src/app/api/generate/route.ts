@@ -76,21 +76,15 @@ export async function POST(request: Request) {
         });
 
         // Ensure AI gets high quality and specific "Nano Banana" aesthetic
-        const enhancedPrompt = `${scrubbedPrompt}, highly detailed, cinematic lighting, 8k, vibrant masterpiece`;
-        const encodedPrompt = encodeURIComponent(enhancedPrompt);
-        const seed = Math.floor(Math.random() * 100000000);
+        // --- STEP 4: Build Pure Internet URLs (Goodbye AI, Hello Speed) ---
+        // Primary: Unsplash (High resolution, real-world relevance)
+        const primaryUrl = `https://source.unsplash.com/featured/1024x1024?${encodeURIComponent(translatedPrompt)}`;
 
-        // --- STEP 4: Build Robust URLs ---
-        // Primary: Pollinations (Standard)
-        const primaryUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
+        // Backup 1: LoremFlickr (Reliable secondary source)
+        const backup1 = `https://loremflickr.com/1024/1024/${encodeURIComponent(translatedPrompt)}/all`;
 
-        // Backup 1: Alternative model
-        const backup1 = `https://pollinations.ai/p/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux`;
-
-        // Backup 2: Direct CDN (Unsplash for high-quality real-world images)
-        // This acts like a "Google Image Search" result
-        const emergencyKeyword = translatedPrompt.split(' ').slice(0, 3).join(',');
-        const backup2 = `https://source.unsplash.com/featured/1024x1024?${encodeURIComponent(emergencyKeyword)}`;
+        // Backup 2: Dynamic Pattern (Absolute safety)
+        const backup2 = `https://picsum.photos/1024/1024?seed=${seed}`;
 
         // --- STEP 5: Final Proxy Package ---
         const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(primaryUrl)}&backup=${encodeURIComponent(backup1)}&emergency=${encodeURIComponent(backup2)}&q=${encodeURIComponent(translatedPrompt)}`;

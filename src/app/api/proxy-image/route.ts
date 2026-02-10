@@ -62,7 +62,7 @@ export async function GET(request: Request) {
                 'Content-Type': contentType,
                 'Cache-Control': 'no-store, no-cache, must-revalidate',
                 'Access-Control-Allow-Origin': '*',
-                'X-Source': response.url.includes('unsplash') ? 'fallback' : 'ai'
+                'X-Source': response.url.includes('unsplash') ? 'primary-web' : 'fallback-web'
             },
         });
     } catch (error) {
