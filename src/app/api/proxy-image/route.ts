@@ -12,7 +12,6 @@ export async function GET(request: Request) {
         return new Response('Missing URL parameter', { status: 400 });
     }
 
-    const query = searchParams.get('q') || 'nature';
     const translatedQuery = query; // Already translated by generate route
 
     const fastFetch = async (url: string, timeout = 3000): Promise<Response | null> => {
