@@ -62,32 +62,19 @@ export async function POST(request: Request) {
         const translatedPrompt = await translateToEnglish(processedPrompt);
         console.log(`[TRANSLATOR] ${prompt} -> ${translatedPrompt}`);
 
-        // --- STEP 3: Chameleon Strategy (Scrubbing for AI Bypass but preserving meaning) ---
-        // Instead of 'curved object', we use terms that help the AI draw a banana without saying 'banana'
-        let scrubbedPrompt = translatedPrompt;
-        const replacements: Record<string, string> = {
-            'banana': 'bright yellow tropical curved fruit',
-            'nano': 'microscopic high-tech',
-        };
-
-        Object.entries(replacements).forEach(([word, replacement]) => {
-            const regex = new RegExp(word, 'gi');
-            scrubbedPrompt = scrubbedPrompt.replace(regex, replacement);
-        });
-
-        // Ensure AI gets high quality and specific "Nano Banana" aesthetic
-        // --- STEP 4: Build Pure Internet URLs (Goodbye AI, Hello Speed) ---
+        // --- STEP 3: Build Pure Internet URLs (Goodbye AI, Hello Speed) ---
         const seed = Math.floor(Math.random() * 100000000);
-        // Primary: Unsplash (High resolution, real-world relevance)
-        const primaryUrl = `https://source.unsplash.com/featured/1024x1024?${encodeURIComponent(translatedPrompt)}`;
 
-        // Backup 1: LoremFlickr (Reliable secondary source)
-        const backup1 = `https://loremflickr.com/1024/1024/${encodeURIComponent(translatedPrompt)}/all`;
+        // Primary: LoremFlickr (Highly reliable for simple keywords like "banana", "dog", etc.)
+        const primaryUrl = `https://loremflickr.com/1024/1024/${encodeURIComponent(translatedPrompt)}/all`;
+
+        // Backup 1: Unsplash (High quality photo source, used as fallback)
+        const backup1 = `https://source.unsplash.com/featured/1024x1024?${encodeURIComponent(translatedPrompt)}`;
 
         // Backup 2: Dynamic Pattern (Absolute safety)
         const backup2 = `https://picsum.photos/1024/1024?seed=${seed}`;
 
-        // --- STEP 5: Final Proxy Package ---
+        // --- STEP 4: Final Proxy Package ---
         const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(primaryUrl)}&backup=${encodeURIComponent(backup1)}&emergency=${encodeURIComponent(backup2)}&q=${encodeURIComponent(translatedPrompt)}`;
 
         return NextResponse.json({ url: proxyUrl });
