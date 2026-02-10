@@ -12,26 +12,8 @@ export async function GET(request: Request) {
         return new Response('Missing URL parameter', { status: 400 });
     }
 
-    // Smart Translation for Fallback (Czech to English)
-    const translate = (txt: string) => {
-        const dict: Record<string, string> = {
-            'banan': 'banana',
-            'banán': 'banana',
-            'pes': 'dog',
-            'kocka': 'cat',
-            'kočka': 'cat',
-            'auto': 'car',
-            'clovek': 'person',
-            'člověk': 'person',
-            'strom': 'tree',
-            'dum': 'house',
-            'dům': 'house'
-        };
-        const lower = txt.toLowerCase();
-        return dict[lower] || txt;
-    };
-
-    const translatedQuery = translate(query);
+    const query = searchParams.get('q') || 'nature';
+    const translatedQuery = query; // Already translated by generate route
 
     const fastFetch = async (url: string, timeout = 3000): Promise<Response | null> => {
         try {
