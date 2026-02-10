@@ -51,10 +51,10 @@ export default function ImageGenerator() {
                     />
                     <button
                         onClick={handleGenerate}
-                        disabled={isGenerating || !prompt}
+                        disabled={isLoading || !prompt}
                         className="bg-white text-black px-6 py-3 rounded-md font-bold hover:bg-gray-200 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isGenerating ? (
+                        {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 Prohledávám internet...

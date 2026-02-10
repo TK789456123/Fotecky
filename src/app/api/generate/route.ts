@@ -77,6 +77,7 @@ export async function POST(request: Request) {
 
         // Ensure AI gets high quality and specific "Nano Banana" aesthetic
         // --- STEP 4: Build Pure Internet URLs (Goodbye AI, Hello Speed) ---
+        const seed = Math.floor(Math.random() * 100000000);
         // Primary: Unsplash (High resolution, real-world relevance)
         const primaryUrl = `https://source.unsplash.com/featured/1024x1024?${encodeURIComponent(translatedPrompt)}`;
 
