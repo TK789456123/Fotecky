@@ -52,7 +52,7 @@ export async function GET(request: Request) {
         return new Response(arrayBuffer, {
             headers: {
                 'Content-Type': contentType,
-                'Cache-Control': 'no-store, no-cache, must-revalidate',
+                'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
                 'Access-Control-Allow-Origin': '*',
                 'X-Source': 'balanced-gate'
             },
