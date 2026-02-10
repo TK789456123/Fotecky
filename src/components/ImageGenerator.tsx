@@ -56,20 +56,30 @@ export default function ImageGenerator() {
                 // Proactive History: Add to history immediately so the user doesn't lose the link
                 addToHistory(data.url);
             } else {
-                throw new Error("No image URL returned from server.");
+                throw new Error("Server nevrátil žádný odkaz.");
             }
         } catch (err) {
             console.error("[DEBUG] Error:", err);
-            setError(err instanceof Error ? err.message : "Něco se pokazilo...");
+            const msg = err instanceof Error ? err.message : "Neznámá chyba vesmíru.";
+            setError(`${msg} Zkuste to znovu nebo použijte přímý odkaz níže.`);
         } finally {
             setIsLoading(false);
         }
     };
 
+    const handleDirectBypass = () => {
+        const seed = Math.floor(Math.random() * 1000000);
+        const directUrl = `https://images.unsplash.com/photo-${seed % 2 === 0 ? '1501854140801-50d01698950b' : '1470071459604-3b5ec3a7fe05'}?auto=format&fit=crop&w=1024&q=80&sig=${seed}`;
+        setGeneratedImage(directUrl);
+        setIsImageLoading(true);
+        addToHistory(directUrl);
+        setError(null);
+    };
+
     return (
         <div className="w-full max-w-4xl mx-auto p-6 flex flex-col items-center relative z-20">
             {/* The Main Button */}
-            <div className="py-10">
+            <div className="py-10 flex flex-col items-center gap-4">
                 <button
                     onClick={handleGenerate}
                     disabled={isLoading}
@@ -92,16 +102,24 @@ export default function ImageGenerator() {
                 </button>
             </div>
 
-            {/* Error Message */}
+            {/* Error Message & Bypass */}
             {error && (
-                <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 flex items-center gap-2 animate-bounce">
-                    <AlertCircle size={20} />
-                    <span>Error: {error}</span>
+                <div className="mb-6 flex flex-col items-center gap-4">
+                    <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 flex items-center gap-2">
+                        <AlertCircle size={20} />
+                        <span className="text-sm">{error}</span>
+                    </div>
+                    <button
+                        onClick={handleDirectBypass}
+                        className="text-xs text-white/40 hover:text-white underline"
+                    >
+                        Nouzový režim (Přímé spojení)
+                    </button>
                 </div>
             )}
 
             {/* Display Area */}
-            <div className="w-full min-h-[400px] mb-12">
+            <div className="w-full min-h-[300px] mb-12">
                 <AnimatePresence mode="wait">
                     {isLoading || isImageLoading ? (
                         <motion.div
@@ -113,15 +131,21 @@ export default function ImageGenerator() {
                         >
                             <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
                             <p className="text-white/60 font-medium tracking-widest text-sm uppercase">Přenáším moment z vesmíru...</p>
+                            <button
+                                onClick={() => setIsImageLoading(false)}
+                                className="mt-4 text-[10px] text-white/20 hover:text-white"
+                            >
+                                Zaseknuto? Zrušit čekání.
+                            </button>
                         </motion.div>
                     ) : generatedImage ? (
                         <motion.div
                             key={generatedImage}
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="w-full"
+                            className="w-full px-4"
                         >
-                            <div className="relative rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 bg-black/40 group">
+                            <div className="relative rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 bg-black/40 group max-w-2xl mx-auto">
                                 <img
                                     src={generatedImage}
                                     alt="Random World"
@@ -130,9 +154,9 @@ export default function ImageGenerator() {
                                     }}
                                     onError={() => {
                                         setIsImageLoading(false);
-                                        setError("Obrázek se nepodařilo načíst.");
+                                        setError("Obrázek se nepodařilo zobrazit (Network Error).");
                                     }}
-                                    className="w-full h-auto object-cover max-h-[75vh]"
+                                    className="w-full h-auto object-cover max-h-[70vh]"
                                 />
 
                                 <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-center gap-4 translate-y-4 group-hover:translate-y-0 transition-transform opacity-0 group-hover:opacity-100">
