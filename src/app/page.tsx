@@ -18,8 +18,9 @@ export default function Home() {
         <ImageGenerator />
       </div>
 
-      <footer className="absolute bottom-4 text-gray-600 text-sm z-10">
-        Powered by Cosmic Radiations & Next.js
+      <footer className="absolute bottom-4 text-gray-600 text-sm z-10 flex flex-col items-center">
+        <span>Powered by Cosmic Radiations & Next.js</span>
+        <span className="text-[10px] opacity-20">Build: 2026.02.10.V3-ULTRA</span>
       </footer>
     </main>
   );
