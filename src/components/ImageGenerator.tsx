@@ -37,36 +37,27 @@ export default function ImageGenerator() {
 
     return (
         <div className="w-full max-w-4xl mx-auto p-6">
-            {/* Input Section */}
-            <div className="relative group z-10">
-                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-pink-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                <div className="relative glass-panel rounded-lg p-2 flex items-center gap-2">
-                    <input
-                        type="text"
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="Imagine anything... a cyberpunk banana in neon rain..."
-                        className="w-full bg-transparent text-white placeholder-gray-400 p-4 outline-none text-lg font-medium"
-                        onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-                    />
-                    <button
-                        onClick={handleGenerate}
-                        disabled={isLoading || !prompt}
-                        className="bg-white text-black px-6 py-3 rounded-md font-bold hover:bg-gray-200 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
+            <div className="flex flex-col items-center gap-8 py-10">
+                <button
+                    onClick={handleGenerate}
+                    disabled={isLoading}
+                    className="relative group px-12 py-6 bg-white text-black rounded-full font-black text-2xl hover:bg-gray-200 transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-110 active:scale-95 duration-200"
+                >
+                    <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-full blur opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <div className="relative flex items-center gap-3">
                         {isLoading ? (
                             <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Prohledávám internet...
+                                <Loader2 className="h-8 w-8 animate-spin" />
+                                <span>Hledám náhodu...</span>
                             </>
                         ) : (
                             <>
-                                <Sparkles className="mr-2 h-4 w-4" />
-                                Najít fotku
+                                <Sparkles className="h-8 w-8 group-hover:animate-pulse" />
+                                <span>Další náhodný obrázek</span>
                             </>
                         )}
-                    </button>
-                </div>
+                    </div>
+                </button>
             </div>
 
             {/* Result Display */}
