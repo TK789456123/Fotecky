@@ -7,11 +7,11 @@ export default function Home() {
 
       <div className="z-10 w-full max-w-5xl flex flex-col items-center gap-8 text-center">
         <div className="space-y-4">
-          <h1 className="text-6xl md:text-8xl font-black bg-clip-text text-transparent bg-gradient-to-br from-yellow-300 via-yellow-500 to-orange-500 glow-text tracking-tighter">
-            NANO BANANA
+          <h1 className="text-4xl md:text-7xl font-black bg-clip-text text-transparent bg-gradient-to-br from-yellow-300 via-yellow-500 to-orange-500 glow-text tracking-tighter uppercase">
+            Random generátor obrázků
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto font-light">
-            Unleash your imagination without limits. Create stunning visuals where the only rule is <span className="text-yellow-400 font-bold">chaos</span>.
+            Objevujte krásy světa v jediném kliknutí. Každý obrázek je unikátní moment <span className="text-yellow-400 font-bold">chaosu</span>.
           </p>
         </div>
 
