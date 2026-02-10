@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Loader2, Download, AlertCircle } from "lucide-react";
 
@@ -10,6 +10,18 @@ export default function ImageGenerator() {
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [history, setHistory] = useState<string[]>([]);
+
+    // Security Timeout: If image takes more than 10s to load, force clear the loading state
+    useEffect(() => {
+        let timeout: NodeJS.Timeout;
+        if (isImageLoading) {
+            timeout = setTimeout(() => {
+                console.warn("[STABILITY] Image load timeout. Forcing UI update.");
+                setIsImageLoading(false);
+            }, 10000); // 10 seconds hard limit
+        }
+        return () => clearTimeout(timeout);
+    }, [isImageLoading]);
 
     const addToHistory = (url: string) => {
         if (!url) return;
@@ -41,6 +53,8 @@ export default function ImageGenerator() {
             if (data.url) {
                 setGeneratedImage(data.url);
                 setIsImageLoading(true);
+                // Proactive History: Add to history immediately so the user doesn't lose the link
+                addToHistory(data.url);
             } else {
                 throw new Error("No image URL returned from server.");
             }
@@ -113,7 +127,6 @@ export default function ImageGenerator() {
                                     alt="Random World"
                                     onLoad={() => {
                                         setIsImageLoading(false);
-                                        addToHistory(generatedImage);
                                     }}
                                     onError={() => {
                                         setIsImageLoading(false);
