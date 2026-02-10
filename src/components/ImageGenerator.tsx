@@ -4,23 +4,21 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wand2, Download, Share2, Sparkles, Loader2 } from "lucide-react";
 
-export default function ImageGenerator() {
-    const [prompt, setPrompt] = useState("");
+const ImageGenerator = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
     const handleGenerate = async () => {
-        if (!prompt) return;
         setIsLoading(true);
         setGeneratedImage(null);
 
-        // Simulate API call
+        // Fetch random image
         try {
             const response = await fetch("/api/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt }),
+                body: JSON.stringify({}),
             });
             const data = await response.json();
 
@@ -89,7 +87,7 @@ export default function ImageGenerator() {
                                 <motion.div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 group bg-black/40">
                                     <img
                                         src={generatedImage}
-                                        alt={prompt}
+                                        alt="Random Moment"
                                         onLoad={() => {
                                             console.log("Image loaded successfully");
                                             setIsImageLoading(false);
@@ -97,9 +95,9 @@ export default function ImageGenerator() {
                                         onError={(e) => {
                                             setIsImageLoading(false);
                                             console.warn("Image recovery active: Proxy failed, using dynamic shield.");
-                                            // Fallback to guaranteed relevant image instead of hardcoded banana
-                                            const query = prompt || 'nature';
-                                            setGeneratedImage(`https://loremflickr.com/1024/1024/${encodeURIComponent(query.split(' ').slice(0, 2).join(','))}`);
+                                            // Fallback to guaranteed relevant image
+                                            const query = 'nature';
+                                            setGeneratedImage(`https://loremflickr.com/1024/1024/${encodeURIComponent(query)}/all`);
                                         }}
                                         className="w-full h-auto object-cover max-h-[700px] min-h-[400px]"
                                     />
@@ -133,4 +131,6 @@ export default function ImageGenerator() {
             </AnimatePresence>
         </div>
     );
-}
+};
+
+export default ImageGenerator;
