@@ -12,8 +12,9 @@ export default function ImageGenerator() {
     const [history, setHistory] = useState<string[]>([]);
 
     const addToHistory = (url: string) => {
+        if (!url) return;
         setHistory(prev => {
-            if (prev.includes(url)) return prev;
+            if (prev[0] === url) return prev;
             return [url, ...prev].slice(0, 3);
         });
     };
@@ -23,6 +24,7 @@ export default function ImageGenerator() {
             console.log("[DEBUG] Clicked Generate");
             setError(null);
             setIsLoading(true);
+            // Don't clear history here
             setGeneratedImage(null);
 
             const response = await fetch("/api/generate", {
@@ -51,7 +53,7 @@ export default function ImageGenerator() {
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto p-6 flex flex-col items-center">
+        <div className="w-full max-w-4xl mx-auto p-6 flex flex-col items-center relative z-20">
             {/* The Main Button */}
             <div className="py-10">
                 <button
@@ -85,90 +87,79 @@ export default function ImageGenerator() {
             )}
 
             {/* Display Area */}
-            <AnimatePresence mode="wait">
-                {(isLoading || isImageLoading || generatedImage) && (
-                    <motion.div
-                        key={generatedImage || "loading"}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="w-full relative"
-                    >
-                        {/* Internal Loading state */}
-                        {(isLoading || isImageLoading) && (
-                            <div className="w-full aspect-video flex flex-col items-center justify-center glass-panel rounded-3xl border border-white/10 bg-black/40">
-                                <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
-                                <p className="text-white/60 font-medium tracking-widest text-sm uppercase">Přenáším moment z vesmíru...</p>
-                            </div>
-                        )}
+            <div className="w-full min-h-[400px] mb-12">
+                <AnimatePresence mode="wait">
+                    {isLoading || isImageLoading ? (
+                        <motion.div
+                            key="loading"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="w-full aspect-video flex flex-col items-center justify-center glass-panel rounded-3xl border border-white/10 bg-black/40"
+                        >
+                            <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+                            <p className="text-white/60 font-medium tracking-widest text-sm uppercase">Přenáším moment z vesmíru...</p>
+                        </motion.div>
+                    ) : generatedImage ? (
+                        <motion.div
+                            key={generatedImage}
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="w-full"
+                        >
+                            <div className="relative rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 bg-black/40 group">
+                                <img
+                                    src={generatedImage}
+                                    alt="Random World"
+                                    onLoad={() => {
+                                        setIsImageLoading(false);
+                                        addToHistory(generatedImage);
+                                    }}
+                                    onError={() => {
+                                        setIsImageLoading(false);
+                                        setError("Obrázek se nepodařilo načíst.");
+                                    }}
+                                    className="w-full h-auto object-cover max-h-[75vh]"
+                                />
 
-                        {/* The Image */}
-                        {generatedImage && (
-                            <div className={isImageLoading ? "hidden" : "block"}>
-                                <div className="relative rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 bg-black/40 group">
-                                    <img
-                                        src={generatedImage}
-                                        alt="Random World"
-                                        onLoad={() => {
-                                            setIsImageLoading(false);
-                                            if (generatedImage) addToHistory(generatedImage);
-                                        }}
-                                        onError={() => {
-                                            setIsImageLoading(false);
-                                            setError("Obrázek se nepodařilo načíst (Network error).");
-                                        }}
-                                        className="w-full h-auto object-cover max-h-[75vh]"
-                                    />
-
-                                    <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-center gap-4 translate-y-4 group-hover:translate-y-0 transition-transform opacity-0 group-hover:opacity-100">
-                                        <a
-                                            href={generatedImage}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="px-6 py-2 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-colors flex items-center gap-2"
-                                        >
-                                            <Download size={18} /> Stáhnout
-                                        </a>
-                                        <div className="text-white/40 text-xs text-center">
-                                            Nepracuje náhled? <a href={generatedImage} target="_blank" className="text-white/80 underline">Otevřít přímo</a>
-                                        </div>
-                                    </div>
+                                <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-center gap-4 translate-y-4 group-hover:translate-y-0 transition-transform opacity-0 group-hover:opacity-100">
+                                    <a
+                                        href={generatedImage}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-6 py-2 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-colors flex items-center gap-2"
+                                    >
+                                        <Download size={18} /> Stáhnout
+                                    </a>
                                 </div>
                             </div>
-                        )}
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        </motion.div>
+                    ) : null}
+                </AnimatePresence>
+            </div>
 
             {/* History Section */}
-            {history.length > 0 && (
-                <div className="mt-20 w-full">
+            {(history.length > 0) && (
+                <div className="mt-10 w-full z-30">
                     <h3 className="text-white/40 text-sm font-bold tracking-widest uppercase mb-6 flex items-center gap-4 py-4">
                         <span className="h-[1px] flex-1 bg-white/10"></span>
                         Poslední úlovky
                         <span className="h-[1px] flex-1 bg-white/10"></span>
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                    <div className="grid grid-cols-3 gap-4 w-full">
                         {history.map((url, i) => (
                             <motion.div
-                                key={url}
-                                initial={{ opacity: 0, y: 20 }}
+                                key={url + i}
+                                initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-white/5 hover:border-white/30 transition-all cursor-pointer group"
+                                className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-white/5 cursor-pointer group shadow-lg"
                                 onClick={() => setGeneratedImage(url)}
                             >
                                 <img src={url} alt="History" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <Sparkles className="text-white" size={24} />
+                                    <Sparkles className="text-white" size={20} />
                                 </div>
                             </motion.div>
-                        ))}
-                        {/* Placeholder slots to keep the 3-grid look */}
-                        {Array.from({ length: 3 - history.length }).map((_, i) => (
-                            <div key={`empty-${i}`} className="aspect-square rounded-xl border border-dashed border-white/5 flex items-center justify-center">
-                                <span className="text-white/5 text-xs font-black">SLOT #{history.length + i + 1}</span>
-                            </div>
                         ))}
                     </div>
                 </div>
