@@ -14,34 +14,30 @@ export async function GET(request: Request) {
 
     const translatedQuery = query; // Already translated by generate route
 
-    const fastFetch = async (url: string, timeout = 5000): Promise<Response | null> => {
+    const fastFetch = async (url: string, timeout = 3000): Promise<Response | null> => {
         try {
-            console.log(`[PROXY] Fetching: ${url}`);
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
             const response = await fetch(url, {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                    'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-                    'Cache-Control': 'no-cache',
                 },
-                next: { revalidate: 0 },
-                signal: AbortSignal.timeout(timeout)
+                signal: controller.signal
             });
+            clearTimeout(id);
             return response.ok ? response : null;
         } catch (e) {
-            console.warn(`[PROXY] Failed: ${url}`);
             return null;
         }
     };
 
     try {
-        // High-Speed Racing: Try Primary and Backup with generous timeouts
-        let response = await fastFetch(imageUrl, 6000);
-        if (!response && backupUrl) response = await fastFetch(backupUrl, 4000);
-        if (!response && emergencyUrl) response = await fastFetch(emergencyUrl, 3000);
+        // High-Speed Racing: Priority on fastest sources
+        let response = await fastFetch(imageUrl, 3500);
+        if (!response && backupUrl) response = await fastFetch(backupUrl, 2500);
+        if (!response && emergencyUrl) response = await fastFetch(emergencyUrl, 2000);
 
-        // ABSOLUTE LAST RESORT: Guaranteed High-Quality Unsplash
         if (!response) {
-            console.log(`[PROXY] Fallback triggered.`);
             const fallback = `https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1024&q=80`;
             response = await fetch(fallback);
         }
@@ -54,17 +50,14 @@ export async function GET(request: Request) {
                 'Content-Type': contentType,
                 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
                 'Access-Control-Allow-Origin': '*',
-                'X-Source': 'balanced-gate'
+                'X-Source': 'speed-gate'
             },
         });
     } catch (error) {
-        console.error('[PROXY] Hard error.');
-        const fallback = 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1024&q=80';
-        const finalResponse = await fetch(fallback);
+        const finalResponse = await fetch('https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1024&q=80');
         const arrayBuffer = await finalResponse.arrayBuffer();
-
         return new Response(arrayBuffer, {
-            headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'no-store' },
+            headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=3600' },
             status: 200
         });
     }
