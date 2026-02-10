@@ -9,19 +9,24 @@ export default function ImageGenerator() {
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [history, setHistory] = useState<string[]>(() => {
-        if (typeof window !== "undefined") {
-            const saved = localStorage.getItem("nano_history");
-            if (saved) {
-                try {
-                    return JSON.parse(saved).slice(0, 3);
-                } catch (e) {
-                    console.error("Failed to parse history", e);
+    const [history, setHistory] = useState<string[]>([]);
+    const [isMounted, setIsMounted] = useState(false);
+
+    // 1. Load history ONLY ONCE after mount to avoid SSR mismatch
+    useEffect(() => {
+        setIsMounted(true);
+        const saved = localStorage.getItem("nano_history");
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed)) {
+                    setHistory(parsed.slice(0, 3));
                 }
+            } catch (e) {
+                console.error("History recovery failed", e);
             }
         }
-        return [];
-    });
+    }, []);
 
     // 2. Clear loading state safety
     useEffect(() => {
@@ -34,20 +39,20 @@ export default function ImageGenerator() {
         return () => clearTimeout(timeout);
     }, [isImageLoading]);
 
-    // 3. Save history to localStorage on change
+    // 3. Save history ONLY if mounted and NOT empty (unless explicitly cleared)
     useEffect(() => {
-        if (typeof window !== "undefined") {
+        if (isMounted && history.length > 0) {
             localStorage.setItem("nano_history", JSON.stringify(history));
         }
-    }, [history]);
+    }, [history, isMounted]);
 
     const addToHistory = (url: string) => {
         if (!url) return;
         setHistory(prev => {
-            // Keep unique items, newest first, limit to 3
+            // High Resolution Unique ID: Strip the random 'r' or 'sig' if we want to collapse same images?
+            // Actually, keep it simple: unique string
             const filtered = prev.filter(item => item !== url);
-            const newList = [url, ...filtered].slice(0, 3);
-            return newList;
+            return [url, ...filtered].slice(0, 3);
         });
     };
 
