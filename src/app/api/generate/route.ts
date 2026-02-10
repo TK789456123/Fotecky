@@ -91,8 +91,9 @@ export async function POST(request: Request) {
         const backup1 = `https://pollinations.ai/p/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux`;
 
         // Backup 2: Direct CDN (Guaranteed fallback using translated English keyword)
-        const emergencyKeyword = translatedPrompt.split(' ').slice(0, 2).join(',');
-        const backup2 = `https://loremflickr.com/1024/1024/${encodeURIComponent(emergencyKeyword)}`;
+        // Adding 'photo,nature' to ensure it returns a real image of the thing, not a logo or event
+        const emergencyKeyword = `${translatedPrompt.split(' ').slice(0, 2).join(',')},photo,nature`;
+        const backup2 = `https://loremflickr.com/1024/1024/${encodeURIComponent(emergencyKeyword)}/all`;
 
         // --- STEP 5: Final Proxy Package ---
         const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(primaryUrl)}&backup=${encodeURIComponent(backup1)}&emergency=${encodeURIComponent(backup2)}&q=${encodeURIComponent(translatedPrompt)}`;
