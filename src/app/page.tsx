@@ -1,6 +1,7 @@
 import ImageGenerator from "@/components/ImageGenerator";
 import { createClient } from "@/utils/supabase/server";
 import { logout } from "./login/actions";
+import { redirect } from "next/navigation";
 import { LogOut, User } from "lucide-react";
 
 export default async function Home() {
@@ -11,8 +12,13 @@ export default async function Home() {
       const { data } = await supabase.auth.getUser();
       user = data.user;
     }
+
+    if (!user) {
+      redirect('/login');
+    }
   } catch (err) {
     console.error("Auth check failed:", err);
+    redirect('/login');
   }
 
   return (
