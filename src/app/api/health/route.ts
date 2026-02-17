@@ -4,6 +4,11 @@ export async function GET() {
     let dbHealth;
     try {
         const supabase = await createClient();
+
+        if (!supabase) {
+            throw new Error("Supabase internal error: Missing configuration.");
+        }
+
         // Simple query to keep Supabase awake
         const { data, error } = await supabase.from('_keep_alive').select('*').limit(1);
 

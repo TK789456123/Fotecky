@@ -8,7 +8,7 @@ export async function createClient() {
 
     if (!supabaseUrl || !supabaseAnonKey) {
         console.error("CRITICAL: Supabase URL or Anon Key is missing in environment variables!");
-        throw new Error("Supabase internal error: Missing configuration.");
+        return null;
     }
 
     const cookieStore = await cookies()

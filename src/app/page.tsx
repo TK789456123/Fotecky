@@ -4,8 +4,16 @@ import { logout } from "./login/actions";
 import { LogOut, User } from "lucide-react";
 
 export default async function Home() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const supabase = await createClient();
+    if (supabase) {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    }
+  } catch (err) {
+    console.error("Auth check failed:", err);
+  }
 
   return (
     <main className="min-h-screen relative flex flex-col items-center justify-start pt-16 px-4 bg-[url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center">

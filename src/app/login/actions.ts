@@ -8,6 +8,10 @@ import { createClient } from '@/utils/supabase/server'
 export async function login(formData: FormData) {
     const supabase = await createClient()
 
+    if (!supabase) {
+        redirect('/login?message=Chyba konfigurace serveru.')
+    }
+
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
@@ -27,6 +31,10 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
     const supabase = await createClient()
 
+    if (!supabase) {
+        redirect('/login?message=Chyba konfigurace serveru.')
+    }
+
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
@@ -45,7 +53,9 @@ export async function signup(formData: FormData) {
 
 export async function logout() {
     const supabase = await createClient()
-    await supabase.auth.signOut()
+    if (supabase) {
+        await supabase.auth.signOut()
+    }
     revalidatePath('/', 'layout')
     redirect('/login')
 }
