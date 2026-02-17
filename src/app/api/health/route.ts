@@ -1,8 +1,9 @@
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/utils/supabase/server';
 
 export async function GET() {
     let dbHealth;
     try {
+        const supabase = await createClient();
         // Simple query to keep Supabase awake
         const { data, error } = await supabase.from('_keep_alive').select('*').limit(1);
 
