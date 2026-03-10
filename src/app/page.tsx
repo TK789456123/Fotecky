@@ -55,7 +55,7 @@ export default async function Home() {
 
       <footer className="absolute bottom-4 text-gray-600 text-sm z-10 flex flex-col items-center">
         <span>Powered by Cosmic Radiations & Next.js</span>
-        <span className="text-[10px] opacity-20">Build: 2026.03.10.V11-SYNC (Auto-Push Enabled)</span>
+        <span className="text-[10px] opacity-20">Build: 2026.03.10.V12-VERCEL-PRO</span>
       </footer>
     </main>
   );
