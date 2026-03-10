@@ -21,8 +21,18 @@ body {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
 
+  @keyframes welcome-fade {
+  0% { opacity: 1; visibility: visible; }
+  70% { opacity: 1; filter: blur(0px); }
+  100% { opacity: 0; visibility: hidden; filter: blur(20px); }
+}
+
+.animate-welcome-fade {
+  animation: welcome-fade 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
   .glow-text {
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    text-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
   }
 
   .neon-border {

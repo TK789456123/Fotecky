@@ -57,5 +57,5 @@ export async function logout() {
         await supabase.auth.signOut()
     }
     revalidatePath('/', 'layout')
-    redirect('/login')
+    redirect('/login?message=Naschledanou! Těšíme se na vaši příští návštěvu. 👋')
 }
