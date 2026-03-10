@@ -1,8 +1,8 @@
 import ImageGenerator from "@/components/ImageGenerator";
+import WelcomeOverlay from "@/components/WelcomeOverlay";
+import UserHeader from "@/components/UserHeader";
 import { createClient } from "@/utils/supabase/server";
-import { logout } from "./login/actions";
 import { redirect } from "next/navigation";
-import { LogOut, User as UserIcon } from "lucide-react";
 
 export default async function Home() {
   let user = null;
@@ -25,28 +25,8 @@ export default async function Home() {
     <main className="min-h-screen relative flex flex-col items-center justify-start pt-16 px-4 bg-[url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-0"></div>
 
-      {/* Welcome Screen Overlay (Client Side logic inside a server component? No, let's use a pure CSS delay or simple component) */}
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black pointer-events-none animate-welcome-fade">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold text-white/40 uppercase tracking-[0.3em]">Vítejte zpět</h2>
-          <p className="text-5xl font-black text-white glow-text">{user.email?.split('@')[0]}</p>
-        </div>
-      </div>
-
-      {/* User Header */}
-      {user && (
-        <div className="absolute top-4 right-4 z-50 flex items-center gap-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-          <div className="flex items-center gap-2 text-white/60 text-xs font-bold uppercase tracking-widest">
-            <UserIcon size={14} className="text-yellow-500" />
-            <span>{user.email}</span>
-          </div>
-          <form action={logout}>
-            <button className="text-white/40 hover:text-white transition-colors">
-              <LogOut size={16} />
-            </button>
-          </form>
-        </div>
-      )}
+      <WelcomeOverlay email={user.email} />
+      <UserHeader email={user.email} />
 
       <div className="z-10 w-full max-w-5xl flex flex-col items-center gap-8 text-center">
         <div className="space-y-4 pt-12">
