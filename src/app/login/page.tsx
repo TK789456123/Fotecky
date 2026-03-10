@@ -62,19 +62,6 @@ export default async function LoginPage({
                         <button formAction={signup} className="w-full bg-white/5 border border-white/10 text-white font-bold py-4 rounded-full hover:bg-white/10 transition-colors">
                             Vytvořit účet
                         </button>
-                        
-                        <div className="relative py-2">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-white/10"></div>
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-black/20 px-2 text-white/20">Nebo</span>
-                            </div>
-                        </div>
-
-                        <button formAction={signInAnonymously} className="w-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 font-bold py-4 rounded-full hover:bg-yellow-500/20 transition-colors uppercase tracking-widest text-xs">
-                            Vstoupit anonymně (Bez limitu) ⚡
-                        </button>
                     </div>
                 </form>
             </div>

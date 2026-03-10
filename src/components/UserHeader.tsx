@@ -15,7 +15,7 @@ export default function UserHeader({ email }: UserHeaderProps) {
                 <UserIcon size={14} className="text-yellow-500" />
                 <span>{email}</span>
             </div>
-            <form action={logout}>
+            <form action="/auth/logout" method="GET">
                 <button 
                     type="submit"
                     className="text-white/40 hover:text-white transition-all hover:scale-110 active:scale-95 cursor-pointer"
