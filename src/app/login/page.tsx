@@ -1,5 +1,5 @@
 
-import { login, signup } from './actions'
+import { login, signup, signInAnonymously } from './actions'
 
 export default async function LoginPage({
     searchParams,
@@ -7,6 +7,8 @@ export default async function LoginPage({
     searchParams: Promise<{ message: string }>
 }) {
     const { message } = await searchParams
+    const isRateLimit = message?.toLowerCase().includes('rate limit');
+
     return (
         <main className="min-h-screen relative flex flex-col items-center justify-center p-4 bg-[url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-0"></div>
@@ -43,8 +45,13 @@ export default async function LoginPage({
                     </div>
 
                     {message && (
-                        <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-2xl text-red-200 text-sm italic">
+                        <div className={`p-4 rounded-2xl text-sm italic border ${isRateLimit ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-200' : 'bg-red-500/20 border-red-500/50 text-red-200'}`}>
                             {message}
+                            {isRateLimit && (
+                                <p className="mt-2 text-[10px] opacity-70 uppercase font-bold tracking-tight">
+                                    Tip: Supabase má limit 3 emaily/hod. Použijte tlačítko níže pro vstup bez omezení!
+                                </p>
+                            )}
                         </div>
                     )}
 
@@ -54,6 +61,19 @@ export default async function LoginPage({
                         </button>
                         <button formAction={signup} className="w-full bg-white/5 border border-white/10 text-white font-bold py-4 rounded-full hover:bg-white/10 transition-colors">
                             Vytvořit účet
+                        </button>
+                        
+                        <div className="relative py-2">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-white/10"></div>
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-black/20 px-2 text-white/20">Nebo</span>
+                            </div>
+                        </div>
+
+                        <button formAction={signInAnonymously} className="w-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 font-bold py-4 rounded-full hover:bg-yellow-500/20 transition-colors uppercase tracking-widest text-xs">
+                            Vstoupit anonymně (Bez limitu) ⚡
                         </button>
                     </div>
                 </form>

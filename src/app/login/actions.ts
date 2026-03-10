@@ -59,3 +59,19 @@ export async function logout() {
     revalidatePath('/', 'layout')
     redirect('/login?message=Naschledanou! Těšíme se na vaši příští návštěvu. 👋')
 }
+
+export async function signInAnonymously() {
+    const supabase = await createClient()
+    if (!supabase) {
+        redirect('/login?message=Chyba konfigurace serveru.')
+    }
+
+    const { error } = await supabase.auth.signInAnonymously()
+
+    if (error) {
+        redirect(`/login?message=${encodeURIComponent("Hostovský přístup selhal: " + error.message)}`)
+    }
+
+    revalidatePath('/', 'layout')
+    redirect('/')
+}
